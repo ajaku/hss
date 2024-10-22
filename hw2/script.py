@@ -72,7 +72,7 @@ newids_count = data['NEWID'].count()
 
 data = data[data['FINCBTXM'] > 0]
 
-desc = data.describe()
+desc = (data.describe()).T
 desc.to_excel('desc.xlsx')
 
 perf_lin_reg(data, 'FINCBTXM', 'TOTEXP', 'INCOME', 'TOTAL EXP.', 'inc_v_texp')
@@ -86,5 +86,5 @@ low_income_data = data[data['Inc_Cat'] == 'Low Income']
 
 perf_lin_reg(high_income_data, 'FINCBTXM', 'TOTEXP', 'INCOME', 'TOTAL EXP.', 'highinc_v_texp')
 perf_lin_reg(low_income_data, 'FINCBTXM', 'TOTEXP', 'INCOME', 'TOTAL EXP.', 'lowinc_v_texp')
-perf_lin_reg(data, 'FINCBTXM', 'FOOD', 'INCOME', 'FOOD EXP.', 'inc_v_foodexp')
-perf_lin_reg(data, 'FINCBTXM', 'FOOD', 'INCOME', 'ALCOHOL EXP.', 'inc_v_alcexp')
+perf_lin_reg(data, 'FINCBTXM', 'FDHOME', 'INCOME', 'FOOD HOME EXP.', 'inc_v_foodhomeexp')
+perf_lin_reg(data, 'FINCBTXM', 'FDAWAY', 'INCOME', 'FOOD AWAY EXP..', 'inc_v_foodawayexp')

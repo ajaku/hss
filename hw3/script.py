@@ -3,9 +3,78 @@ from scipy.stats import ttest_ind
 from scipy.stats import pearsonr
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
+from statsmodels.iolib.summary2 import summary_col
+from stargazer.stargazer import Stargazer
+import imgkit
+from PIL import Image
+from bs4 import BeautifulSoup
+
+def perf_multi_lin_reg(df, formula, x_p_labels, y_p, name):
+    # Fit the model with robust standard errors
+    model = smf.ols(formula, data=df).fit(cov_type='HC3')
+    
+    # Render the model using Stargazer
+    stargazer = Stargazer([model])
+    html = stargazer.render_html()
+    
+    # Replace predictor names with more readable labels
+    for var, label in x_p_labels.items():
+        html = html.replace(var, label)
+    html = html.replace(model.model.endog_names, y_p)  # Replace the dependent variable name
+
+    const = f"Intercept (β₀)"
+    html = html.replace("Intercept", const)
+    
+    print(html)
+    # Parse the HTML
+    soup = BeautifulSoup(html, "html.parser")
+
+    # Locate the Intercept (β₀) and Tobacco (β₁) rows
+    intercept_row = None
+    tobacco_row = None
+    for row in soup.find_all("tr"):
+        if "Intercept (β₀)" in row.text:
+            intercept_row = row
+        elif "Tobacco (β₁)" in row.text:
+            tobacco_row = row
+
+    # Ensure Tobacco rows follow Intercept rows
+    if intercept_row and tobacco_row:
+        # Find the rows following Intercept and insert Tobacco there
+        intercept_next_row = intercept_row.find_next_sibling("tr")
+        
+        # Remove Tobacco rows and their parentheses row to reinsert them
+        tobacco_row_next = tobacco_row.find_next_sibling("tr")
+        tobacco_row.extract()
+        tobacco_row_next.extract()
+
+        # Insert Tobacco rows directly after Intercept rows
+        intercept_next_row.insert_after(tobacco_row_next)
+        intercept_next_row.insert_after(tobacco_row)
+
+    # Get the modified HTML
+    sorted_html = str(soup)
+    print(sorted_html)
+    html = sorted_html
+
+    # Save the HTML to an image file
+    img_name = f"{name}.png"
+    imgkit.from_string(html, img_name)
+    img = Image.open(img_name)
+
+    # Crop the image if necessary
+    cropped_img = img.crop((0, 0, img.width - 475, img.height))
+    cropped_img.save(img_name)
 
 df = pd.read_csv('cleaned_data.csv')
 
+'''
+1g
+'''
+
+'''
+2a
+'''
 print((df.describe()).T)
 
 print("2a) Compute the mean difference in birthweight by smoking status")
@@ -44,11 +113,18 @@ print(mean_birthweight_by_bin)
 print("\nMean difference in birth weight compared to 0-cigarette bin:")
 print(mean_diff_from_0)
 
+'''
+2b
+'''
 print("\n2b) Under what circumstances can one idenitfy the average treatment effect of maternal smoking by comparing" + 
       " the unadjusted difference in mean birth weight of infants of smoking and non-smoking mothers?")
 
 print("- For one to identify the difference there would need to be no omitted variables that may have an impact - i.e. all" +
       "all else would need to be help constant (ceritus paribus). ")
+
+'''
+2c
+'''
 
 # Define treatment and control groups
 treatment_group = df[df['tobacco'] == 0]  # Smoking mothers
@@ -101,6 +177,13 @@ table_df = pd.DataFrame(results)
 
 # Display the table
 print(table_df)
+
+'''
+2d
+'''
+
+# We can use the data based signs of the correlations to make this analysis - idk how to really state the direction in one way or another in most of these cases
+
 
 '''
 2e
@@ -165,3 +248,37 @@ model_with_bad_control = smf.ols(formula_with_bad_control, data=df).fit(cov_type
 
 # Print the regression summary
 print(model_with_bad_control.summary())
+
+# Define variable labels for each model
+x_p_labels_useless = {
+    'tobacco': 'Tobacco (β₁)',
+    'dmage': 'Mother’s Age',
+    'wgain': 'Weight Gain',
+    'dmeduc': 'Education',
+    'alcohol': 'Alcohol',
+    'adequacy': 'Prenatal Care Adequacy',
+    'csex': 'Child Sex'
+}
+
+x_p_labels_bad = {
+    'tobacco': 'Tobacco (β₁)',
+    'dmage': 'Mother’s Age',
+    'wgain': 'Weight Gain',
+    'dmeduc': 'Education',
+    'alcohol': 'Alcohol',
+    'adequacy': 'Prenatal Care Adequacy',
+    'lung': 'Lung Health'
+}
+
+# Generate outputs for each model
+perf_multi_lin_reg(df, 
+                   formula_with_useless_controls, 
+                   x_p_labels_useless, 
+                   "Infant Birth Weight", 
+                   "model_with_useless_controls")
+
+perf_multi_lin_reg(df, 
+                   formula_with_bad_control, 
+                   x_p_labels_bad, 
+                   "Infant Birth Weight", 
+                   "model_with_bad_control")

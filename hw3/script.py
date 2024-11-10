@@ -25,7 +25,6 @@ def perf_multi_lin_reg(df, formula, x_p_labels, y_p, name):
     const = f"Intercept (β₀)"
     html = html.replace("Intercept", const)
     
-    print(html)
     # Parse the HTML
     soup = BeautifulSoup(html, "html.parser")
 
@@ -54,7 +53,6 @@ def perf_multi_lin_reg(df, formula, x_p_labels, y_p, name):
 
     # Get the modified HTML
     sorted_html = str(soup)
-    print(sorted_html)
     html = sorted_html
 
     # Save the HTML to an image file
@@ -77,20 +75,19 @@ df = pd.read_csv('cleaned_data.csv')
 '''
 print((df.describe()).T)
 
-print("2a) Compute the mean difference in birthweight by smoking status")
-# Ensure 'dbrwt' and 'tobacco' columns exist in the dataset
-if 'dbrwt' in df.columns and 'tobacco' in df.columns:
-    # Compute mean birth weight for each smoking status (1: smoker, 0: non-smoker)
-    birthweight_by_smoking = df.groupby('tobacco')['dbrwt'].mean()
-    
-    # Calculate the mean difference
-    mean_diff = birthweight_by_smoking[1] - birthweight_by_smoking[0]
-    
-    print("Mean birth weight for smokers:", birthweight_by_smoking[1])
-    print("Mean birth weight for non-smokers:", birthweight_by_smoking[0])
-    print("Mean difference in birth weight by smoking status:", mean_diff)
-else:
-    print("The required columns 'dbrwt' or 'tobacco' are missing from the dataset.")
+# Define treatment and control groups
+treatment_group = df[df['tobacco'] == 0]  # Smoking mothers
+control_group = df[df['tobacco'] == 1]    # Non-smoking mothers
+
+
+smoking_mean = (treatment_group['dbrwt']).mean()
+non_smoking_mean = (control_group['dbrwt']).mean()
+print(smoking_mean)
+print(non_smoking_mean)
+print(smoking_mean - non_smoking_mean)
+print("Mean birth weight for smokers:", smoking_mean)
+print("Mean birth weight for non-smokers:", non_smoking_mean)
+print("Mean difference in birth weight by smoking status (smokers vs. non-smokers):", (smoking_mean - non_smoking_mean))
 
 bins = [0, 10, 20, 30, 40, 97, 98]  # 98 represents 98 or more cigarettes in the dataset
 labels = ['0', '1-10', '11-20', '21-30', '31-40', '41+']
@@ -125,10 +122,6 @@ print("- For one to identify the difference there would need to be no omitted va
 '''
 2c
 '''
-
-# Define treatment and control groups
-treatment_group = df[df['tobacco'] == 0]  # Smoking mothers
-control_group = df[df['tobacco'] == 1]    # Non-smoking mothers
 
 # Select covariates to test
 covariates = ['dmage', 'alcohol', 'cigar', 'wgain', 'pldel3', 'dmeduc', 'adequacy', 'nlbnl', 'monpre', 'nprevist',

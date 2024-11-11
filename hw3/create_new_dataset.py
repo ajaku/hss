@@ -306,7 +306,15 @@ unknown_values = {
     'cigar': [99],
     'alcohol': [9],
     'drink': [99],
-    'wgain': [99]
+    'wgain': [99],
+    'preterm': [9],
+    'phyper': [9],
+    'chyper': [9],
+    'herpes': [9],
+    'diabetes': [9],
+    'lung': [9],
+    'cardiac': [9],
+    'anemia': [9]
 }
 
 # Drop rows with "unknown" values
@@ -323,13 +331,15 @@ binary_columns = [
 ]
 
 # Remap (1, 2) to (0, 1) for binary columns
-df[binary_columns] = df[binary_columns].replace({1: 0, 2: 1})
+# 0 means use it, 1 means don't use
+# let's remap this to 0 means dont use, 1 means use
+df[binary_columns] = df[binary_columns].replace({1: 1, 2: 0})
 
 # Drop unnecessary columns
-columns_to_drop = ['cigar6', 'drink5']
-df.drop(columns=columns_to_drop, inplace=True)
+columns_to_keep = ['dbrwt', 'tobacco', 'dmage', 'alcohol', 'csex', 'lung', 'cigar', 'wgain', 'pldel3', 'dmeduc', 'adequacy', 'nlbnl', 'monpre', 'nprevist', 'isllb10']
+df_filtered = df[columns_to_keep]
 
 # Save the cleaned data to a new CSV file
-df.to_csv('cleaned_data.csv', index=False)
+df_filtered.to_csv('cleaned_data.csv', index=False)
 
 print("Data cleaned and saved to 'cleaned_data.csv'")

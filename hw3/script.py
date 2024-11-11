@@ -243,6 +243,10 @@ model_with_bad_control = smf.ols(formula_with_bad_control, data=df).fit(cov_type
 print(model_with_bad_control.summary())
 
 # Define variable labels for each model
+x_p_labels= {
+    'tobacco': 'Tobacco (β₁)'
+}
+
 x_p_labels_useless = {
     'tobacco': 'Tobacco (β₁)',
     'dmage': 'Mother’s Age',
@@ -265,13 +269,18 @@ x_p_labels_bad = {
 
 # Generate outputs for each model
 perf_multi_lin_reg(df, 
+                   formula, 
+                   x_p_labels, 
+                   "Infant Birth Weight", 
+                   "model_simple")
+perf_multi_lin_reg(df, 
                    formula_with_useless_controls, 
                    x_p_labels_useless, 
                    "Infant Birth Weight", 
-                   "model_with_useless_controls")
+                   "model_useless")
 
 perf_multi_lin_reg(df, 
                    formula_with_bad_control, 
                    x_p_labels_bad, 
                    "Infant Birth Weight", 
-                   "model_with_bad_control")
+                   "model_bad")

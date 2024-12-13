@@ -87,19 +87,19 @@ f_df = df[df['schlid'].isin([1, 75])]
 X_did = f_df[['ap_schl', 'ap_schl2']]
 X_did = add_constant(X_did)  # Add constant for intercept
 
-y_wage = f_df['wage']
+y_wage = f_df['wage2']
 
 model_did = OLS(y_wage, X_did).fit()
 print(model_did.summary())
 
 # Group by year and school, calculate the mean wage
-grouped = f_df.groupby(['year', 'schlid'])['wage'].mean().reset_index()
+grouped = f_df.groupby(['year', 'schlid'])['wage2'].mean().reset_index()
 
 # Plot the trends for both schools
 plt.figure(figsize=(10, 6))
 for school in [1, 75]:
     school_data = grouped[grouped['schlid'] == school]
-    plt.plot(school_data['year'], school_data['wage'], label=f"School {school}")
+    plt.plot(school_data['year'], school_data['wage2'], label=f"School {school}")
 
 plt.axvline(x=5, color='red', linestyle='--', label="Year 5: AP Start for School 75")
 plt.xlabel('Year')
@@ -121,7 +121,7 @@ f_df['treated_post'] = f_df['treated'] * f_df['post']
 # Define the dependent variable (wage) and independent variables (including the dummies and interaction term)
 X = f_df[['treated', 'post', 'treated_post']]  # Independent variables
 X = sm.add_constant(X)  # Add a constant for the intercept
-y = f_df['wage']  # Dependent variable
+y = f_df['wage2']  # Dependent variable
 
 # Run the OLS regression
 model = sm.OLS(y, X).fit()
@@ -154,7 +154,7 @@ f_df['treated_after'] = f_df['treated'] * f_df['after']
 # Define the dependent variable (wage) and independent variables
 X = f_df[['treated', 'after', 'treated_after']]  # Independent variables
 X = sm.add_constant(X)  # Add a constant for the intercept
-y = f_df['wage']  # Dependent variable
+y = f_df['wage2']  # Dependent variable
 
 # Run the OLS regression
 model = sm.OLS(y, X).fit()
